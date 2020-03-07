@@ -1,0 +1,103 @@
+public class FileDownLoadManager {
+
+    private static FileDownLoadManager instance;
+    private static DownloadManager mDownloadManager;
+    static LongSparseArray<String> mApkPaths;
+    public static long downLoadID = Constant.DOWN_LOAD_INIT_ID;
+    private DownloadManager.Request req;
+
+    public static FileDownLoadManager getInstance() {
+        if (instance == null) {
+            synchronized (FileDownLoadManager.class) {
+                instance = new FileDownLoadManager();
+                mApkPaths = new LongSparseArray<>();
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * 获取 DownloadManager 实例
+     *
+     * @return 返回 DownloadManager 对象
+     */
+    private static DownloadManager getDM(Context context) {
+        if (mDownloadManager == null) {
+            synchronized (FileDownLoadManager.class) {
+                mDownloadManager = (DownloadManager) context
+                        .getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            }
+        }
+        return mDownloadManager;
+    }
+
+    /**
+     * 调用系统 下载方法 下载 apk
+     *
+     * @param context     上下文
+     * @param uri         下载 apk 链接
+     * @param title       文件名
+     * @param description 文件描述
+     * @param md5         即将下载的apk md5 值
+     * @return 下载ID 标识
+     */
+    public long startDownload(Context context, String uri,
+                              String title, String description, String md5) {
+        SharePreFile.putString(context, "updateApk", uri);
+        if (downLoadID != Constant.DOWN_LOAD_INIT_ID) return Constant.DOWN_LOAD_INIT_ID;
+        boolean downLoad = clearApk(context, title, md5);
+        if (!downLoad) return Constant.DOWN_LOAD_APK_FAILED;
+        File fileDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (fileDir == null) return Constant.EXTERNAL_STORAGE_NOT_EXIST;
+        if (req != null && SharePreFile.getString(context, "updateApk", "").equalsIgnoreCase(uri)) {
+
+        } else {
+            req = new DownloadManager.Request(Uri.parse(uri));
+        }
+        req.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
+        //点击正在下载的Notification进入下载详情界面，如果设为true则可以看到下载任务的进度，如果设为false，则看不到我们下载的任务
+        req.setVisibleInDownloadsUi(true);
+        //设置文件的保存的位置/自定义文件路径
+        File file = new File(fileDir, title);
+        req.setDestinationUri(Uri.fromFile(file));
+        // 此方法表示在下载过程中通知栏会一直显示该下载，在下载完成后仍然会显示，
+        // 直到用户点击该通知或者消除该通知。还有其他参数可供选择
+        req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        // 通过setAllowedNetworkTypes方法可以设置允许在何种网络下下载，
+        // 也可以使用setAllowedOverRoaming方法，它更加灵活移动网络是否允许下载
+        req.setAllowedOverRoaming(true);
+        // 设置一些基本显示信息
+        req.setTitle(title);
+        req.setDescription(description);
+        req.setMimeType("application/vnd.android.package-archive");
+        //加入下载队列
+        downLoadID = getDM(context).enqueue(req);
+        mApkPaths.put(downLoadID, file.getAbsolutePath());
+        return downLoadID;
+    }
+
+    /**
+     * 如果之前下载过已经存在apk,删除之前的apk
+     *
+     * @param apkName apk名字
+     * @param md5     apk md5 信息
+     * @return true 继续执行下载任务， false 中断下载任务
+     */
+
+    private boolean clearApk(Context context, String apkName, String md5) {
+        File apkFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), apkName);
+        if (apkFile.exists()) {
+            if (!"".equalsIgnoreCase(md5) && md5.equals(UpdateUtil.getMd5(apkFile))) { // 已经存在apk, 直接安装apk
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                    UpdateUtil.installAPK(context);// Android N  执行安装
+                } else { // Android N 以下
+                    Uri data = Uri.parse("file://" + apkFile);
+                    UpdateUtil.promptInstall(context, data);
+                }
+                return false;
+            }
+            boolean delete = apkFile.delete();
+        }
+        return true;
+    }
+}
