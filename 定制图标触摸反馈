@@ -1,0 +1,17 @@
+ /**
+     * 定制图标触摸反馈
+     *
+     * @param context Context引用
+     * @param view    View控件
+     */
+    public static void setIconBackground(Context context, View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ColorStateList colorStateList = AppCompatResources.getColorStateList(context,
+                    R.color.anim_icon_click);
+            RippleDrawable rippleDrawable = new RippleDrawable(colorStateList, null, null);
+            view.setBackground(rippleDrawable);
+        } else {
+            view.setBackground(ContextCompat.getDrawable(context,
+                    R.drawable.anim_icon_selector));
+        }
+    }
