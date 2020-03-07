@@ -1,0 +1,79 @@
+
+    public class NotificationUtils {
+        private final int SmallIcon = R.drawable.ic_download;
+        private NotificationManager mManager;
+        private NotificationCompat.Builder mBuilder;
+        private final int NotificationNumber = 1;
+        private final Random RANDOM = new Random();
+        private Context mContext;
+        private static NotificationUtils mNotificationUtils;
+
+
+        private NotificationUtils(Context context) {
+            this.mContext = context;
+        }
+
+        public static NotificationUtils getInstance(Context context) {
+            if (mNotificationUtils == null) {
+                synchronized (NotificationUtils.class) {
+                    if (mNotificationUtils == null) {
+                        mNotificationUtils = new NotificationUtils(context);
+                    }
+                }
+            }
+            return mNotificationUtils;
+        }
+
+        public NotificationCompat.Builder getBuilder() {
+            mBuilder = new NotificationCompat.Builder(mContext);
+            mBuilder.setNumber(NotificationNumber)// 显示右边的数字
+                    .setWhen(System.currentTimeMillis())// 设置通知发送时间
+                    .setPriority(Notification.PRIORITY_DEFAULT)//设置优先级
+                    .setAutoCancel(true); // 用户点击是否取消
+            return mBuilder;
+        }
+
+        /**
+         * 得到通知栏的管理类
+         */
+        public NotificationManager getManager() {
+            if (mManager == null) {
+                synchronized (NotificationUtils.class) {
+                    if (mManager == null) {
+                        mManager = (NotificationManager) mContext.
+                                getSystemService(mContext.NOTIFICATION_SERVICE);
+                    }
+                }
+            }
+            return mManager;
+        }
+
+        // 普通的通知栏
+        public void showOrdinaryNotification(String title, String text, int channel) {
+            mBuilder = getBuilder();
+            mManager = getManager();
+            mBuilder.setContentTitle(title)
+                    .setContentText(text)
+                    .setContentIntent(getDefalutIntent(mContext, Notification.FLAG_AUTO_CANCEL))
+                    .setNumber(NotificationNumber)//显示数量
+                    .setWhen(System.currentTimeMillis())//通知产生的时间
+                    .setPriority(Notification.PRIORITY_DEFAULT)//设置该通知优先级
+                    .setAutoCancel(true)//设置让通知将自动取消
+                    .setOngoing(false)//ture，设置他为一个正在进行的通知。如一个文件下载,网络连接。
+                    .setDefaults(Notification.DEFAULT_SOUND)//向通知添加声音、闪灯和振动效果。最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合：
+                    //Notification.DEFAULT_ALL Notification.DEFAULT_SOUND 添加声音 //DEFAULT_VIBRATE requires VIBRATE permission
+                    .setSmallIcon(SmallIcon);
+            Notification mNotification = mBuilder.build();
+            mManager.notify(dealWithId(channel), mNotification);
+        }
+
+        //获取默认的延期意图
+        private static PendingIntent getDefalutIntent(Context context, int flags) {
+            return PendingIntent.getActivity(context, 1, new Intent(), flags);
+        }
+
+        //通知channel ID，唯一标示一个通知
+        private int dealWithId(int channel) {
+            return channel >= 1 && channel <= 100 ? channel : RANDOM.nextInt(Integer.MAX_VALUE - 100) + 101;
+        }
+    }
