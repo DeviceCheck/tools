@@ -1,0 +1,32 @@
+public static boolean findBinary(final String binaryName, List<String> searchPaths)
+	{
+
+		boolean found = false;
+
+		if (searchPaths == null)
+		{
+			searchPaths = getPath();
+		}
+
+		for (String path : searchPaths)
+		{
+			if (!path.endsWith("/"))
+			{
+				path += "/";
+			}
+
+			if (new File(path + binaryName).exists())
+			{
+				found = true;
+				break;
+			}
+
+		}
+
+		return found;
+	}
+	
+public static boolean isRootAvailable()
+	{
+		return findBinary("su", null);
+	}
