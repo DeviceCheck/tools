@@ -1,0 +1,35 @@
+// 定义动画
+Animation mAnimBottomToTop = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.slide_bottom_to_top);
+
+Animation mAnimTopToBottom = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.slide_top_to_bottom);
+				
+// 如何执行
+Linearlayout ll;
+ll.startAnimation(mAnimBottomToTop);
+
+anim设置：
+	======================================================================
+	slide_bottom_to_top：
+	<?xml version="1.0" encoding="utf-8"?>
+	<set xmlns:android="http://schemas.android.com/apk/res/android"
+		android:interpolator="@android:anim/accelerate_interpolator" >
+
+		<translate
+			android:duration="300"
+			android:fromYDelta="100%p"
+			android:toYDelta="0" />
+	</set>
+	======================================================================
+	slide_top_to_bottom：
+	<?xml version="1.0" encoding="utf-8"?>
+	<set xmlns:android="http://schemas.android.com/apk/res/android"
+		android:interpolator="@android:anim/accelerate_interpolator">
+
+		<translate
+			android:duration="300"
+			android:fromYDelta="0"
+			android:toYDelta="100%p" />
+
+	</set>
