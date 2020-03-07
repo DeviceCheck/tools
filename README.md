@@ -1,7 +1,5 @@
 # tools
 
-
-## google
 [google 开源博客](https://opensource.googleblog.com/)
 
 [组件开发 guide](https://guides.codepath.com/android/#usage)
