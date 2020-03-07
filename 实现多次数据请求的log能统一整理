@@ -1,0 +1,41 @@
+class LoggingInterceptor implements Interceptor {
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        String msg = "";
+        Request request = chain.request();
+        long t1 = System.nanoTime();
+        okhttp3.Response response = chain.proceed(chain.request());
+
+        RequestBody requestBody = request.body();
+        boolean hasRequestBody = requestBody != null;
+        Connection connection = chain.connection();
+        Protocol protocol = connection != null ? connection.protocol() : Protocol.HTTP_1_1;
+        msg = "\n--> " + request.method() + ' ' + request.url() + ' ' + protocol;
+        if (hasRequestBody && request.url().equals(response.request().url())) {
+            // 请求行和请求头
+            msg += " (" + requestBody.contentLength() + "-byte body)" +
+                    "\nHeads : " + request.headers();
+        }
+
+        long t2 = System.nanoTime();
+        float time = TimeUnit.NANOSECONDS.toMillis(t2 - t1);
+        if (request.url().equals(response.request().url())) {
+            msg += String.format(Locale.getDefault(), "<-- " + response.code() +
+                            " Received response for %s in %.1fms%n%s",
+                    response.request().url(), time, response.headers());
+        }
+
+        okhttp3.MediaType mediaType = response.body().contentType();
+        String content = response.body().string();
+        if (request.url().equals(response.request().url())) {
+            msg += "response body:" + content;
+        }
+
+        if (request.url().equals(response.request().url())) {
+            NetfitsLogger.debugAndSave(msg);
+        }
+        return response.newBuilder()
+                .body(okhttp3.ResponseBody.create(mediaType, content))
+                .build();
+    }
+}
