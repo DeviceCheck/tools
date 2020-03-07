@@ -1,0 +1,37 @@
+ 第一步：添加权限
+ <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+ 注意：这个权限是添加自启动的权限，如果手机禁止了app自启动的话那么就不会收到自启动的消息。
+ app启动了才能收到广播。
+ 
+ 第二步：添加广播接收类
+
+	/**
+	 * 监听开机启动的广播
+	 */
+
+	public class BootReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// Android 7.0设备以上重启后会接收到此消息
+			String locked_boot = "android.intent.action.LOCKED_BOOT_COMPLETED";
+			// Android 7.0设备一下重启后会接收到此消息
+			String boot = "android.intent.action.BOOT_COMPLETED";
+
+			if (boot.equalsIgnoreCase(intent.getAction())) {
+				Toast.makeText(context, "测试系统广播事件，启动时执行....", Toast.LENGTH_LONG).show();
+				NetpasLogger.debug(this, "测试系统广播事件，启动时执行.");
+			} else if(locked_boot.equalsIgnoreCase(intent.getAction())) {
+				Toast.makeText(context, "测试系统广播事件 7.0，启动时执行....", Toast.LENGTH_LONG).show();
+			}
+		}
+	}
+
+ 第三步：静态注册广播
+	<receiver android:name="net.netfits.android.netfits.receiver.BootReceiver"
+            android:enabled="true" android:exported="true" android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+     </receiver>
+	 只有静态注册广播才能监听到手机启动，因为它是没有生命周期的，动态的注册广播会根据程序的销毁而销毁。
