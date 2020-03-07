@@ -32,7 +32,7 @@ class LoggingInterceptor implements Interceptor {
         }
 
         if (request.url().equals(response.request().url())) {
-            NetfitsLogger.debugAndSave(msg);
+            Log.debugAndSave(msg);
         }
         return response.newBuilder()
                 .body(okhttp3.ResponseBody.create(mediaType, content))
