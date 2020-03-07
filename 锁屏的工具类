@@ -1,0 +1,71 @@
+public class ScreenUtils {
+    private Context mContext;
+    private static ScreenUtils INSTANCE;
+    private boolean mScreen = false;
+    private ScreenBroadcastReceiver mScreenReceiver;
+
+    private ScreenUtils(Context context) {
+        this.mContext = checkNotNull(context, "context is null");
+        this.mScreenReceiver = new ScreenBroadcastReceiver();
+        startScreenBroadcastReceiver();
+    }
+
+    public static ScreenUtils getInstance(Context context) {
+        if (INSTANCE == null) {
+            synchronized (ScreenUtils.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new ScreenUtils(context);
+                }
+            }
+        }
+
+      return INSTANCE;
+    }
+
+    /**
+     * 启动screen状态广播接收器
+     */
+    private void startScreenBroadcastReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        mContext.registerReceiver(mScreenReceiver, filter);
+    }
+
+    private class ScreenBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                // 开屏
+                mScreen = true;
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                // 锁屏
+                mScreen = false;
+            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                // 解锁
+            }
+        }
+    }
+
+    public synchronized void removeObserver() {
+        if (INSTANCE != null) {
+            INSTANCE.removeScreenReceiver();
+            INSTANCE = null;
+        }
+    }
+
+    /**
+     * 移除对屏幕的监听
+     */
+    private void removeScreenReceiver() {
+        try {
+            mContext.unregisterReceiver(mScreenReceiver);
+        } catch (Exception e) {
+            NetpasLogger.debug("SCREEN EVENT: unregister failed");
+        } finally {
+            mScreenReceiver = null;
+        }
+    }
+}
