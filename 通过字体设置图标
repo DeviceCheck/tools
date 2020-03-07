@@ -1,0 +1,4 @@
+Typeface customFont = Typeface.createFromAsset(getAssets(), "ztd.ttf");
+TextView mDataCartIcon; // init
+mDataCartIcon.setText("D");// 这里对应的是十六进制的数字
+mDataCartIcon.setTypeface(customFont);
