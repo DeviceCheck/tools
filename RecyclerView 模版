@@ -1,0 +1,62 @@
+// 在Activity中或者fragment中使用
+List mTaskList = new ArrayList();
+
+mTaskList.clear();
+mTaskList.addAll(mTaskDetailList.getTaskList());
+mShareMessage = mTaskDetailList.getShare() + String.format(Constant.URL_SHARE_CONN,
+		Constant.HOST_SHARE) + "?friend=" + mGearId;
+if (mAdapter == null) {
+	mAdapter = new TaskDetailAdapter(getContext(), (ArrayList<TaskDetail>) mTaskList, mPresenter);
+	mTaskDetialRecyclerview.setAdapter(mAdapter);
+} else {
+	mAdapter.notifyDataSetChanged();
+}
+
+设置adapter
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+
+    private final List<Pair<String, Integer>> modkData;
+    private final int type;
+
+	// 构造方法创建
+    public MyAdapter(int type, int orientation) {
+        modkData = MockDataGeneration.getModkData(type, orientation);
+        this.type = type;
+        this.orientation = orientation;
+    }
+
+
+	// 添加布局
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(parent.getContext(), R.layout_recycler_item, null);
+        // 在用这个view构造出来一个ViewHolder返回出去
+        return new MyViewHolder(view);
+    }
+
+	// 在这里面设置数据
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        
+    }
+
+
+	// 自己定义的ViewHolder
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
+        @InjectView(R.id.item_iv)
+        ImageView itemIv;
+        @InjectView(R.id.item_tv)
+        TextView itemTv;
+
+        public MyViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.inject(this, itemView);
+        }
+    }
+
+    // 等价于getCount方法
+    @Override
+    public int getItemCount() {
+        
+    }
+}
