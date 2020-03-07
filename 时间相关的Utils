@@ -1,0 +1,31 @@
+/**
+     * 用于计算剩余的天数
+     *
+     * @param start 开始天数
+     * @param end   结束天数
+     */
+	 第一种方法：
+    Date date = new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.CHINA);
+    String currentDate = sdf.format(date);
+    
+	public static int daysBetween(String start, String end) throws ParseException{
+        SimpleDateFormat simpleDateFormat = new
+                SimpleDateFormat("yyyyMMdd", Locale.CHINA);//输入日期的格式
+        Date date1 = simpleDateFormat.parse(start);
+        Date date2 = simpleDateFormat.parse(end);
+        GregorianCalendar cal1 = new GregorianCalendar();
+        GregorianCalendar cal2 = new GregorianCalendar();
+        cal1.setTime(date1);
+        cal2.setTime(date2);
+        // 从间隔毫秒变成间隔天数
+        return (int) ((cal2.getTimeInMillis() - cal1.getTimeInMillis()) / (1000 * 3600 * 24));
+    }
+	
+	第二种方法：
+	 DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+	 Date dayLog = df.parse(datetime);
+	 
+	 private static int differentDaysByMillisecond(Date date1, Date date2) {
+        return (int) ((date2.getTime() - date1.getTime()) / (1000 * 3600 * 24));
+    }
