@@ -1,0 +1,17 @@
+根据百分比适配布局
+ViewTreeObserver viewTreeObserver = parentLinearContainer.getViewTreeObserver();
+
+if (viewTreeObserver.isAlive()) {
+	viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+		@Override
+		public void onGlobalLayout() 
+			parentLinearContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			// 获取根布局的高度
+			int viewHeight = parentLinearContainer.getHeight();
+			// 设置比例高度
+			double belowHeaderPixels = viewHeight * 3.17 / 100;
+			belowHeaderContainer.getLayoutParams().height = (int) belowHeaderPixels;
+			accountNameTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) belowHeaderPixels);
+		}
+	}
+}
