@@ -1,0 +1,58 @@
+class MyListnener implements SensorEventListener {
+    private boolean isopent = false;
+    private Camera camera;
+
+    //当传感器数据变化的时候调用的方法
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float light = event.values[0];
+        Log.d(TAG, "onSensorChanged: " + "光线强度:"+light);
+
+        if (light < 30) {
+            if (!isopent) {
+                camera = Camera.open();
+                Camera.Parameters params = camera.getParameters();
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                camera.setParameters(params);
+                camera.startPreview(); // 开始亮灯
+                isopent = true;
+            }
+        } else {
+            if (isopent) {
+                camera.stopPreview(); // 关掉亮灯
+                camera.release(); // 关掉照相机
+                isopent = false;
+            }
+        }
+    }
+    //当传感器精度发生变化的时候调用的方法
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        Log.d(TAG, "onAccuracyChanged: " + sensor + ", accuracy" + accuracy);
+    }
+}
+
+
+ private void initUI() {
+        //1. 获取传感器管理器SensorManager
+        final SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+        //2. 获取某个传感器的引用，注册监听
+        final Sensor sensor = sm.getDefaultSensor(Sensor.TYPE_LIGHT);
+        final MyListnener listener = new MyListnener();
+
+        findViewById(R.id.bt_light).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 注册监听
+                sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+        });
+
+        findViewById(R.id.bt_close).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 取消监听
+                sm.unregisterListener(listener, sensor);
+            }
+        });
+    }
